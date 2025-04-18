@@ -91,14 +91,12 @@ def check_verification_success(tab) -> Optional[VerificationStatus]:
         VerificationStatus: The corresponding status if successful, None if failed
     """
     for idx,status in enumerate(VerificationStatus):
-        print(status)
-        if(idx < index):
+        if(idx == 0 and index != 0):
             continue
         if tab.ele(status.value):
             index = index + 1
             logging.info(get_translation("verification_success", status=status.name))
             return status
-        print("error")
     return None
 
 
