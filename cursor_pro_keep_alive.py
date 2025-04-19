@@ -12,6 +12,7 @@ import hmac
 import hashlib
 import uuid
 import requests
+from disable_auto_update import AutoUpdateDisabler 
 
 from exit_cursor import ExitCursor
 import go_cursor_help
@@ -513,6 +514,9 @@ def reset_machine_id(greater_than_0_45):
     else:
         MachineIDResetter().reset_machine_ids()
 
+def disable_cursor_update():
+    AutoUpdateDisabler().disable_auto_update()
+
 
 def print_end_message():
     logging.info("\n\n\n\n\n")
@@ -525,6 +529,54 @@ def print_end_message():
     logging.info(
         "Please visit the open source project for more information: https://github.com/wangffei/wf-cursor-auto-free.git"
     )
+
+
+def save_account_info(email, password, access_token, refresh_token):
+    """
+    将账号信息保存为JSON文件
+    
+    Args:
+        email: 注册邮箱
+        password: 账号密码
+        access_token: 访问令牌
+        refresh_token: 刷新令牌
+    """
+    logging.info(get_translation("saving_account_info"))
+    
+    # 创建accounts目录（如果不存在）
+    accounts_dir = "accounts"
+    if not os.path.exists(accounts_dir):
+        os.makedirs(accounts_dir)
+    
+    # 生成文件名（使用时间戳确保唯一性）
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    filename = f"cursor_account_{timestamp}.json"
+    filepath = os.path.join(accounts_dir, filename)
+    
+    # 创建账号信息字典
+    account_info = {
+        "email": email,
+        "password": password,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "created_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    # 写入JSON文件
+    try:
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(account_info, f, indent=4, ensure_ascii=False)
+        logging.info(get_translation("account_saved_successfully", path=filepath))
+        # 在控制台打印账号信息和保存路径
+        print("\n" + "="*50)
+        print(f"📁 {get_translation('account_saved_successfully', path=filepath)}")
+        print(f"📧 Email: {email}")
+        print(f"🔑 Password: {password}")
+        print("="*50 + "\n")
+        return True
+    except Exception as e:
+        logging.error(get_translation("account_save_failed", error=str(e)))
+        return False
 
 
 if __name__ == "__main__":
@@ -544,11 +596,13 @@ if __name__ == "__main__":
         print(get_translation("select_operation_mode"))
         print(get_translation("reset_machine_code_only"))
         print(get_translation("complete_registration"))
+        print(get_translation("only_sign_up"))
+        print(get_translation("disable_auto_update"))
 
         while True:
             try:
                 choice = int(input(get_translation("enter_option")).strip())
-                if choice in [1, 2]:
+                if choice in [1, 2, 3, 4]:
                     break
                 else:
                     print(get_translation("invalid_option"))
@@ -560,6 +614,10 @@ if __name__ == "__main__":
             reset_machine_id(greater_than_0_45)
             logging.info(get_translation("machine_code_reset_complete"))
             print_end_message()
+            sys.exit(0)
+        
+        if choice == 4:
+            disable_cursor_update()
             sys.exit(0)
 
         logging.info(get_translation("initializing_browser"))
@@ -614,6 +672,21 @@ if __name__ == "__main__":
         if sign_up_account(browser, tab):
             logging.info(get_translation("getting_session_token"))
             accessToken,refreshToken = get_cursor_session_token(tab)
+
+            if choice == 3:
+                # 将账号密码写入一个json文件中
+                if accessToken and refreshToken:
+                    if save_account_info(account, password, accessToken, refreshToken):
+                        logging.info(get_translation("account_info_saved"))
+                        print_end_message()
+                    else:
+                        logging.error(get_translation("failed_to_save_account_info"))
+                else:
+                    logging.error(get_translation("session_token_failed"))
+                    # 即使没有token，也保存账号和密码信息
+                    save_account_info(account, password, "", "")
+                sys.exit(0)
+
             if accessToken:
                 logging.info(get_translation("updating_auth_info"))
                 update_cursor_auth(
