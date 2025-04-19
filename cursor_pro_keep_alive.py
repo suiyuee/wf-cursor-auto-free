@@ -45,7 +45,7 @@ class VerificationStatus(Enum):
     PASSWORD_PAGE = "@name=password"
     CAPTCHA_PAGE = "@data-index=0"
     ACCOUNT_SETTINGS = "Account Settings"
-    TOKEN_REFRESH = "Log in to Cursor Desktio"
+    TOKEN_REFRESH = "You're currently logged in as:"
 
 
 class TurnstileError(Exception):
@@ -83,7 +83,7 @@ def save_screenshot(tab, stage: str, timestamp: bool = True) -> None:
     except Exception as e:
         logging.warning(f"Failed to save screenshot: {str(e)}")
 
-def check_verification_success(tab) -> Optional[VerificationStatus]:
+def check_verification_success(tab, default_status=None) -> Optional[VerificationStatus]:
     global index
     """
     Check if verification was successful
@@ -91,6 +91,12 @@ def check_verification_success(tab) -> Optional[VerificationStatus]:
     Returns:
         VerificationStatus: The corresponding status if successful, None if failed
     """
+    if default_status:
+        if tab.ele(default_status.value):
+            logging.info(get_translation("verification_success", status=default_status.name))
+            return default_status
+        else:
+            return None
     for idx,status in enumerate(VerificationStatus):
         if(idx == 0 and index != 0):
             continue
@@ -239,10 +245,36 @@ def get_cursor_session_token(tab, max_attempts=3, retry_interval=2):
     url = "https://www.cursor.com/cn/loginDeepControl?challenge="+params["n"] +"&uuid="+params["r"]+"&mode=login"
     tab.get(url)
 
-    # 检查是否到达登录界面
-    check_verification_success(tab)
+    attempts = 0
 
-    tab.ele("Yes, Log In").click()
+    while attempts < max_attempts:
+        # 检查是否到达登录界面
+        status = check_verification_success(tab, VerificationStatus.TOKEN_REFRESH)
+        if status:
+            break
+
+        attempts += 1
+
+        if attempts < max_attempts:
+            time.sleep(retry_interval)
+
+    time.sleep(2)
+
+    # 使用精确的CSS选择器在Python中查找元素并点击
+    tab.run_js("""
+        try {
+            const button = document.querySelectorAll(".min-h-screen")[1].querySelectorAll(".gap-4")[1].querySelectorAll("button")[1];
+            if (button) {
+                button.click();
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            console.error("选择器错误:", e);
+            return false;
+        }
+    """)
 
     _,accessToken,refreshToken = poll_for_login_result(params["r"], params["s"])
 
