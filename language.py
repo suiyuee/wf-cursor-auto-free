@@ -17,6 +17,7 @@ class Language:
                 "complete_registration": "2. 完整注册流程",
                 "only_sign_up": "3. 仅注册",
                 "disable_auto_update": "4. 禁止自动升级",
+                "select_saved_account": "5. 选择已保存账号并应用",
                 "enter_option": "请输入选项: ",
                 "invalid_option": "无效的选项,请重新输入",
                 "enter_valid_number": "请输入有效的数字",
@@ -182,7 +183,23 @@ class Language:
                 "auto_update_disabled": "Auto update successfully disabled",
                 "disable_update_failed": "Failed to disable auto update: {error}",
                 "disable_cursor_auto_update_title": "Disable Cursor Auto Update",
-                "press_enter_continue": "Press Enter to continue..."
+                "press_enter_continue": "Press Enter to continue...",
+                
+                # Accounts management
+                "accounts_dir_not_found": "账号目录 {dir} 不存在",
+                "no_account_files_found": "在 {dir} 目录中未找到账号文件",
+                "saved_accounts_title": "\n=== 已保存的账号 ===",
+                "account_created_time": "创建时间",
+                "reading_error": "读取错误",
+                "return_to_main_menu": "返回上级菜单",
+                "select_account_number": "请选择要应用的账号编号",
+                "invalid_selection": "无效的选择，请重新输入",
+                "please_enter_number": "请输入数字",
+                "loading_account_info": "正在从 {path} 加载账号信息",
+                "using_account": "使用账号: {email}",
+                "incomplete_account_info": "账号信息不完整，缺少必要字段",
+                "apply_account_failed": "应用账号信息失败",
+                "apply_account_error": "应用账号时出错: {error}"
             },
             "en": {
                 # System messages
@@ -195,6 +212,9 @@ class Language:
                 "select_operation_mode": "\nPlease select operation mode:",
                 "reset_machine_code_only": "1. Reset machine code only",
                 "complete_registration": "2. Complete registration process",
+                "only_sign_up": "3. Sign up only",
+                "disable_auto_update": "4. Disable auto update",
+                "select_saved_account": "5. Select and apply saved account",
                 "enter_option": "Please enter option (1 or 2): ",
                 "invalid_option": "Invalid option, please enter again",
                 "enter_valid_number": "Please enter a valid number",
@@ -360,7 +380,23 @@ class Language:
                 "auto_update_disabled": "Auto update successfully disabled",
                 "disable_update_failed": "Failed to disable auto update: {error}",
                 "disable_cursor_auto_update_title": "Disable Cursor Auto Update",
-                "press_enter_continue": "Press Enter to continue..."
+                "press_enter_continue": "Press Enter to continue...",
+                
+                # Accounts management
+                "accounts_dir_not_found": "Accounts directory {dir} does not exist",
+                "no_account_files_found": "No account files found in directory {dir}",
+                "saved_accounts_title": "\n=== Saved Accounts ===",
+                "account_created_time": "Created",
+                "reading_error": "Reading error",
+                "return_to_main_menu": "Return to main menu",
+                "select_account_number": "Please select account number to apply",
+                "invalid_selection": "Invalid selection, please try again",
+                "please_enter_number": "Please enter a number",
+                "loading_account_info": "Loading account information from {path}",
+                "using_account": "Using account: {email}",
+                "incomplete_account_info": "Incomplete account information, missing required fields",
+                "apply_account_failed": "Failed to apply account information",
+                "apply_account_error": "Error applying account: {error}"
             }
         }
     

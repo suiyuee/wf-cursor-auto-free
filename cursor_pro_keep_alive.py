@@ -579,6 +579,104 @@ def save_account_info(email, password, access_token, refresh_token):
         return False
 
 
+def list_and_apply_saved_accounts():
+    """
+    列出保存的账号并允许用户选择一个应用
+    """
+    accounts_dir = "accounts"
+    if not os.path.exists(accounts_dir):
+        logging.error(get_translation("accounts_dir_not_found", dir=accounts_dir))
+        return False
+    
+    # 获取所有JSON文件
+    account_files = [f for f in os.listdir(accounts_dir) if f.endswith('.json')]
+    if not account_files:
+        logging.error(get_translation("no_account_files_found", dir=accounts_dir))
+        return False
+    
+    # 排序按照创建时间（文件名中包含的时间戳）
+    account_files.sort(reverse=True)
+    
+    # 显示账号列表
+    print(get_translation("saved_accounts_title"))
+    for i, filename in enumerate(account_files):
+        try:
+            filepath = os.path.join(accounts_dir, filename)
+            with open(filepath, 'r', encoding='utf-8') as f:
+                account_data = json.load(f)
+                email = account_data.get('email', 'N/A')
+                created_time = account_data.get('created_time', get_translation("account_created_time"))
+                print(f"{i+1}. {email} ({get_translation('account_created_time')}: {created_time})")
+        except Exception as e:
+            print(f"{i+1}. {filename} [{get_translation('reading_error')}: {str(e)}]")
+    
+    # 用户选择
+    print(f"\n0. {get_translation('return_to_main_menu')}")
+    while True:
+        try:
+            choice = int(input(f"{get_translation('select_account_number')}: ").strip())
+            if choice == 0:
+                return False
+            elif 1 <= choice <= len(account_files):
+                selected_file = account_files[choice-1]
+                return apply_account_from_file(os.path.join(accounts_dir, selected_file))
+            else:
+                print(get_translation("invalid_selection"))
+        except ValueError:
+            print(get_translation("please_enter_number"))
+
+def apply_account_from_file(filepath):
+    """
+    从文件中加载账号信息并应用
+    
+    Args:
+        filepath: 账号信息文件路径
+    
+    Returns:
+        bool: 是否成功应用
+    """
+    try:
+        logging.info(get_translation("loading_account_info", path=filepath))
+        
+        with open(filepath, 'r', encoding='utf-8') as f:
+            account_data = json.load(f)
+        
+        email = account_data.get('email')
+        access_token = account_data.get('access_token')
+        refresh_token = account_data.get('refresh_token')
+        
+        if not email or not access_token or not refresh_token:
+            logging.error(get_translation("incomplete_account_info"))
+            return False
+        
+        logging.info(get_translation("using_account", email=email))
+        logging.info(get_translation("updating_auth_info"))
+        
+        result = update_cursor_auth(
+            email=email, 
+            access_token=access_token, 
+            refresh_token=refresh_token
+        )
+        
+        if result:
+            logging.info(
+                "Please visit the open source project for more information: https://github.com/wangffei/wf-cursor-auto-free.git"
+            )
+            greater_than_0_45 = check_cursor_version()
+            logging.info(get_translation("resetting_machine_code"))
+            reset_machine_id(greater_than_0_45)
+            logging.info(get_translation("all_operations_completed"))
+            print_end_message()
+            return True
+        else:
+            logging.error(get_translation("apply_account_failed"))
+            return False
+            
+    except Exception as e:
+        logging.error(get_translation("apply_account_error", error=str(e)))
+        return False
+
+
 if __name__ == "__main__":
     print_logo()
     
@@ -598,11 +696,12 @@ if __name__ == "__main__":
         print(get_translation("complete_registration"))
         print(get_translation("only_sign_up"))
         print(get_translation("disable_auto_update"))
+        print(get_translation("select_saved_account"))
 
         while True:
             try:
                 choice = int(input(get_translation("enter_option")).strip())
-                if choice in [1, 2, 3, 4]:
+                if choice in [1, 2, 3, 4, 5]:
                     break
                 else:
                     print(get_translation("invalid_option"))
@@ -619,6 +718,15 @@ if __name__ == "__main__":
         if choice == 4:
             disable_cursor_update()
             sys.exit(0)
+        
+        if choice == 5:
+            # 列出并应用保存的账号
+            if list_and_apply_saved_accounts():
+                sys.exit(0)
+            else:
+                # 如果返回False，说明操作取消或失败，返回主菜单
+                # 为简单起见，这里直接退出程序
+                sys.exit(0)
 
         logging.info(get_translation("initializing_browser"))
 
