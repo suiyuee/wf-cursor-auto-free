@@ -68,8 +68,4 @@ QQ群号：996321868
 - [chengazhen/cursor-auto-free](https://github.com/chengazhen/cursor-auto-free) - 本项目的基础，提供了 Cursor Pro 自动化的核心功能
 - [linuxDo](https://linux.do/) - 一个真正的技术社区，提供了宝贵的支持和帮助
 
-## 注意事项
-
-请远离"海豚"等骗子。
-
 

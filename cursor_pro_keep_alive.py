@@ -15,6 +15,7 @@ import requests
 from disable_auto_update import AutoUpdateDisabler 
 
 from exit_cursor import ExitCursor
+from start_cursor import StartCursor
 import go_cursor_help
 import patch_cursor_get_machine_id
 from reset_machine import MachineIDResetter
@@ -329,20 +330,12 @@ def poll_for_login_result(uuid, challenge):
         while attempt < max_attempts:
             print("Polling for login result...")
             try:
-                print(poll_url)
                 response = requests.get(poll_url, headers=headers)
-                print(f"Got login result: {response.status_code}")
 
                 if response.status_code == 404:
                     print("Login not completed yet.")
                 elif response.status_code == 200:
-                    print(f"${response.text}")
                     data = response.json()
-                    print(f"Got login JSON: {data}")
-
-                    if "error" in data:
-                        print(f"Error during login: {data['error']}")
-                        break
 
                     if "authId" in data and "accessToken" in data and "refreshToken" in data:
                         print("Login successful!")
@@ -555,8 +548,7 @@ def print_end_message():
     logging.info("=" * 30)
     logging.info(get_translation("all_operations_completed"))
     logging.info("\n=== Get More Information ===")
-    logging.info("📺 Bilibili UP: 想回家的前端")
-    logging.info("🔥 WeChat Official Account: code 未来")
+    logging.info("🔥 WeChat Official Account: wf5569")
     logging.info("=" * 30)
     logging.info(
         "Please visit the open source project for more information: https://github.com/wangffei/wf-cursor-auto-free.git"
@@ -699,6 +691,7 @@ def apply_account_from_file(filepath):
             reset_machine_id(greater_than_0_45)
             logging.info(get_translation("all_operations_completed"))
             print_end_message()
+            start_cursor()
             return True
         else:
             logging.error(get_translation("apply_account_failed"))
@@ -708,6 +701,9 @@ def apply_account_from_file(filepath):
         logging.error(get_translation("apply_account_error", error=str(e)))
         return False
 
+def start_cursor():
+    if os.getenv("BROWSER_HEADLESS", "True").lower() == "true":
+        StartCursor()
 
 if __name__ == "__main__":
     print_logo()
@@ -720,7 +716,6 @@ if __name__ == "__main__":
     browser_manager = None
     try:
         logging.info(get_translation("initializing_program"))
-        ExitCursor()
 
         # Prompt user to select operation mode
         print(get_translation("select_operation_mode"))
@@ -741,6 +736,7 @@ if __name__ == "__main__":
                 print(get_translation("enter_valid_number"))
 
         if choice == 1:
+            ExitCursor()
             # Only reset machine code
             reset_machine_id(greater_than_0_45)
             logging.info(get_translation("machine_code_reset_complete"))
@@ -748,10 +744,12 @@ if __name__ == "__main__":
             sys.exit(0)
         
         if choice == 4:
+            ExitCursor()
             disable_cursor_update()
             sys.exit(0)
         
         if choice == 5:
+            ExitCursor()
             # 列出并应用保存的账号
             if list_and_apply_saved_accounts():
                 sys.exit(0)
@@ -760,6 +758,8 @@ if __name__ == "__main__":
                 # 为简单起见，这里直接退出程序
                 sys.exit(0)
 
+        if choice != 3:
+            ExitCursor()
         logging.info(get_translation("initializing_browser"))
 
         # Get user_agent
@@ -839,6 +839,9 @@ if __name__ == "__main__":
                 reset_machine_id(greater_than_0_45)
                 logging.info(get_translation("all_operations_completed"))
                 print_end_message()
+
+                # 注册完成，判断是否需要启动cursor
+                start_cursor()
             else:
                 logging.error(get_translation("session_token_failed"))
 
