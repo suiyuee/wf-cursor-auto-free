@@ -40,7 +40,7 @@
 
 [详细使用文档](https://cursor-auto-free-doc.vercel.app)
 
-## QQ交流群
+## QQ交流群（有问题先发qq群，qq群会及时发最新版本）
 
 QQ群号：996321868
 
