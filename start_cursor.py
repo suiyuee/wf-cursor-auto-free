@@ -82,20 +82,10 @@ class CursorStarter:
             
             logging.info(f"正在启动 Cursor: {executable}")
             
-            # 使用适当的方法启动 Cursor，确保作为独立进程运行
+            # 使用适当的方法启动 Cursor
             if self.system == "Windows":
-                # 使用 startupinfo 隐藏命令行窗口，启动独立进程
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                startupinfo.wShowWindow = 0  # SW_HIDE
-                
-                # 不使用 shell=True，并分离进程
-                subprocess.Popen(
-                    executable, 
-                    startupinfo=startupinfo,
-                    shell=False,  # 不使用 shell
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS  # 分离进程
-                )
+                # 方式1: 使用start命令在新进程中启动
+                os.system(f'start "" "{executable}"')
             elif self.system == "Darwin":
                 # 在 macOS 上，使用 open 命令启动应用
                 subprocess.Popen(["open", "-a", "Cursor"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
